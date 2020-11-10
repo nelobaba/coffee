@@ -1,0 +1,37 @@
+npm i -g @nestjs/cli
+nest --version
+nest --help
+nest new --------> application_name
+npm run start
+ npm run start:dev // watch file
+ nest g co // nest generate controller --no-spec
+ nest g s
+ nest g class coffees/dto/create-coffee.dto --no-spec
+
+
+use path parameter to identify a specific resource and use query parameter to sort that resource
+
+The ValidationPipe provides a convenient way of enforcing validation rules for all 
+incoming client payloads. You can specify these rules by using simple annotations in your DTO!
+app.useGlobalPipes(new ValidationPipe()); // main.ts file
+npm i class-validator class-transformer 
+npm i @nestjs/mapped-types
+
+npm install @nestjs/typeorm typeorm pg
+nest g class coffees/entities/flavor.entity --no-spec
+nest g class common/dto/pagination-query.dto --no-spec
+nest g class events/entities/event.entity --no-spec
+
+npx typeorm migration:create -n CoffeeRefactor
+
+// Compile project first 
+npm run build
+
+// Run migration(s) 
+npx typeorm migration:run
+
+// REVERT migration(s)
+npx typeorm migration:revert
+
+// Let TypeOrm generate migrations (for you)
+npx typeorm migration:generate -n SchemaSync

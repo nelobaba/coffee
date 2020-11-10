@@ -3,6 +3,7 @@ import { response } from 'express';
 import { CoffeesService } from './coffees.service';
 import { CreateCoffeeDto } from './dto/create-coffee.dto';
 import { UpdateCoffeeDto } from './dto/update-coffee.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller('coffees') // ties /coffees url to this controller
 export class CoffeesController {
@@ -12,9 +13,9 @@ export class CoffeesController {
     ){}
 
     @Get('flavors') // nested urls
-    findAll(@Query() paginationQuery) {
+    findAll(@Query() paginationQuery: PaginationQueryDto) {
         // const { limit, offset } = paginationQuery;
-        return this.coffeesService.findAll();
+        return this.coffeesService.findAll(paginationQuery);
     }
 
     @Get(':id') // nested urls
