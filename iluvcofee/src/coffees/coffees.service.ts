@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException, Inject, Scope } from '@nestjs/common';
 import { Coffee } from './entity/coffee.entity';
 import { Event } from '../events/entities/event.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,16 +7,19 @@ import { CreateCoffeeDto } from './dto/create-coffee.dto';
 import { UpdateCoffeeDto } from './dto/update-coffee.dto';
 import { Flavor } from './entities/flavor.entity';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { COFFEE_BRANDS } from './coffees.constants';
 
-@Injectable()
+// Scope DEFAULT - This is assumed when NO Scope is entered like so: @Injectable() */ Singleton
+@Injectable({ scope: Scope.DEFAULT })
 export class CoffeesService {
     constructor(
         @InjectRepository(Coffee)
         private readonly coffeeRepository: Repository<Coffee>,
         @InjectRepository(Flavor)
         private readonly flavorRepository: Repository<Flavor>,
-        private readonly connection: Connection
-    ){}
+        private readonly connection: Connection,
+        @Inject(COFFEE_BRANDS) coffeeBrands: string[],
+    ){ console.log(coffeeBrands)}
 
     // perform eager loading of relations
     findAll(paginationQuery: PaginationQueryDto) {
