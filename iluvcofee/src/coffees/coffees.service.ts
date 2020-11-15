@@ -8,6 +8,9 @@ import { UpdateCoffeeDto } from './dto/update-coffee.dto';
 import { Flavor } from './entities/flavor.entity';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 import { COFFEE_BRANDS } from './coffees.constants';
+/* Utilize ConfigService */
+import { ConfigService, ConfigType } from '@nestjs/config'; // provides get method for reading env variables
+import coffeesConfig from './config/coffees.config';
 
 // Scope DEFAULT - This is assumed when NO Scope is entered like so: @Injectable() */ Singleton
 @Injectable({ scope: Scope.DEFAULT })
@@ -19,7 +22,34 @@ export class CoffeesService {
         private readonly flavorRepository: Repository<Flavor>,
         private readonly connection: Connection,
         @Inject(COFFEE_BRANDS) coffeeBrands: string[],
-    ){ console.log(coffeeBrands)}
+        private readonly configService: ConfigService,
+        @Inject(coffeesConfig.KEY)
+        private coffeesConfiguration: ConfigType<typeof coffeesConfig>,
+    ){
+        console.log(coffeeBrands)
+        /* Accessing process.env variables from ConfigService */
+        // const databaseHost = this.configService.get<string>('DATABASE_HOST');
+        /**
+         * Grabbing this nested property within our App 
+         * via "dot notation" (a.b)
+         */
+        const databaseHost = this.configService.get('database.host', 'localhost');
+        console.log(databaseHost);
+
+                // ---------
+        // ⚠️ sub optimal ways of retrieving Config ⚠️
+
+        /* Grab coffees config within App */
+        // const coffeesConfig = this.configService.get('coffees');
+        // console.log(coffeesConfig);
+
+        /* Grab nested property within coffees config */
+        // const foo = this.configService.get('coffees.foo');
+        // console.log(foo);
+        // Now strongly typed, and able to access properties via:
+        console.log(coffeesConfiguration.foo); 
+
+    }
 
     // perform eager loading of relations
     findAll(paginationQuery: PaginationQueryDto) {
