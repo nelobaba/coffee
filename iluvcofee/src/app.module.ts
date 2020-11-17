@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -7,6 +7,8 @@ import { CoffeesModule } from './coffees/coffees.module';
 import { CoffeeRatingModule } from './coffee-rating/coffee-rating.module';
 import { DatabaseModule } from './database/database.module';
 import appConfig from './config/app.config';
+import { APP_PIPE } from '@nestjs/core/constants';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -30,8 +32,18 @@ import appConfig from './config/app.config';
     }),
     CoffeeRatingModule,
     DatabaseModule,
+    CommonModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // this way we are setting up a pipe from within a module context,
+    // lets nest instatiates the ValidationPipe within the context of an
+    // AppModule and registers it as a global Pipe
+    {
+      provide: APP_PIPE, // provider token for ValidationPipe
+      useClass: ValidationPipe,
+    }
+  ],
 })
 export class AppModule {}

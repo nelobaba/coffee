@@ -35,3 +35,184 @@ npx typeorm migration:revert
 
 // Let TypeOrm generate migrations (for you)
 npx typeorm migration:generate -n SchemaSync
+
+// Nest CLI - Generate a new CoffeeRatingModule
+nest g mo coffee-rating
+
+// Nest CLI - Generate a new CoffeeRatingService 
+nest g s coffee-rating
+
+
+// String-valued token Provider as a Non Class based Provider
+{
+  provide: 'COFFEE_BRANDS', // 👈
+  useValue: ['buddy brew', 'nescafe'] // array of coffee brands,
+},
+
+// Injecting string-valued token into CoffeesService
+@Injectable()
+export class CoffeesService {
+  constructor(@Inject('COFFEE_BRANDS') coffeeBrands: string[]) {}
+}
+
+/* coffees.constants.ts File */
+export const COFFEE_BRANDS = 'COFFEE_BRANDS';
+
+
+// Our mock implementation--- use for Injecting constant Value as a useValue syntax value.
+export class MockCoffeesService { }
+
+@Module({
+  providers: [
+    {
+      provide: CoffeesService,
+      useValue: new MockCoffeesService(), // <-- mock implementation
+    }
+  ]
+})
+export class CoffeesModule {}
+
+
+// "useClass" syntax example
+{
+  provide: ConfigService,
+  useClass:
+    process.env.NODE_ENV === 'development'
+      ? DevelopmentConfigService
+      : ProductionConfigService,
+},
+
+// "useFactory" syntax example used to provide providers dynamically
+// the values returned from the factory functions is what is used by the 
+// providers
+{
+  provide: 'COFFEE_BRANDS',
+  useFactory: () => ['buddy brew', 'nescafe']
+}
+
+// Asynchronous "useFactory" (async provider example)
+{
+  provide: 'COFFEE_BRANDS',
+  // Note "async" here, and Promise/Async event inside the Factory function 
+  // Could be a database connection / API call / etc
+  // In our case we're just "mocking" this type of event with a Promise
+  useFactory: async (connection: Connection): Promise<string[]> => {
+    // const coffeeBrands = await connection.query('SELECT * ...');
+    const coffeeBrands = await Promise.resolve(['buddy brew', 'nescafe'])
+    return coffeeBrands;
+  },
+  inject: [Connection],
+},
+
+
+------------- Dynamic Modules ---------
+nest g mo database
+
+// Scope DEFAULT - This is assumed when NO Scope is entered like so: @Injectable() */
+@Injectable({ scope: Scope.DEFAULT })
+export class CoffeesService {}
+
+// -------------
+
+/** 
+ * Scope TRANSIENT 
+  
+ * Transient providers are NOT shared across consumers. 
+ * Each consumer that injects a transient provider 
+ * will receive a new, dedicated instance of that provider. 
+ */
+@Injectable({ scope: Scope.TRANSIENT })
+export class CoffeesService {}
+
+// Scope TRANSIENT with a Custom Provider
+{
+  provide: 'COFFEE_BRANDS',
+  useFactory: () => ['buddy brew', 'nescafe'],
+  scope: Scope.TRANSIENT // 👈
+}
+
+// -------------
+
+/**
+ * Scope REQUEST 
+
+ * Request scope provides a new instance of the provider 
+ * exclusively for each incoming request. 
+ */
+@Injectable({ scope: Scope.REQUEST })
+export class CoffeesService {}
+
+
+// Injecting the ORIGINAL Request object
+@Injectable({ scope: Scope.REQUEST })
+export class CoffeesService {
+  constructor(@Inject(REQUEST) private request: Request) {} // 👈
+}
+
+npm i @nestjs/config
+$ npm install @hapi/joi
+$ npm install --save-dev @types/hapi__joi
+
+// Use Joi validation
+ConfigModule.forRoot({
+  validationSchema: Joi.object({
+    DATABASE_HOST: Joi.required(),
+    DATABASE_PORT: Joi.number().default(5432),
+  }),
+}),
+
+nest g filter common/filters/http-exception
+nest g guard common/guards/api-key
+
+// Nest is able to pass metadata to route handlers validation
+//@SetMetaData('key', 'value') decorators.
+//Reflector class helps us retrieve metadata within a specific context
+
+nest g mo common
+
+Interceptors make it possible for us to:
+bind extra logic before or after method execution
+transform the result returned from a method
+transform the exception thrown from a method
+extend basic method behavior
+or even completely overriding a method - depending on a specific condition (for example: doing something like caching various responses)
+
+nest g interceptor common/interceptors/wrap-response
+
+Another technique useful for Interceptors is to extend the basic function behavior by applying RxJS operators to the response stream.
+
+﻿To help us learn about this concept by example - let’s imagine that we need to handle timeouts for all of our route requests.
+
+When an endpoint does not return anything after a certain period of time, we need to terminate the request, and send back an error message.
+
+nest g interceptor common/interceptors/timeout
+
+Pipes have two typical use cases:
+Transformation: where we transform input data to the desired output
+& validation: where we evaluate input data and if valid, simply pass it through unchanged. If the data is NOT valid - we want to throw an exception.
+In both cases, pipes operate on the arguments being processed by a controller’s route handler. 
+
+NestJS triggers a pipe just before a method is invoked.
+
+Pipes also receive the arguments meant to be passed on to the method. Any transformation or validation operation takes place at this time - afterwards the route handler is invoked with any (potentially) transformed arguments.
+
+nest g pipe common/pipes/parse-int
+
+
+Middleware functions have access to the request and response objects, and are not specifically tied to any method, but rather to a specified route PATH.
+
+Middleware functions can perform the following tasks:
+
+executing code
+making changes to the request and the response objects.
+ending the request-response cycle.
+Or even calling the next middleware function in the call stack.
+When working with middleware, if the current middleware function does not END the request-response cycle, it must call the next() method, which passes control to the next middleware function.
+
+Otherwise, the request will be left hanging - and never complete.
+
+
+nest g middleware common/middleware/logging
+
+
+Examples of Param Decorators @Body, @Param etc
